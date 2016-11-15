@@ -132,20 +132,32 @@ class URL:
     # absolute-URI  = scheme ":" hier-part [ "?" query ]
     __slots__ = ('_cache', '_val')
 
-    def __new__(cls, val='', *, encoded=False):
+    def __new__(cls, val='', **kwargs):
         if isinstance(val, URL):
             return val
         else:
             return super(URL, cls).__new__(cls)
 
-    def __init__(self, val='', *, encoded=False):
+    def __init__(self, val='', _SplitResult=SplitResult,
+                 *, encoded=False, is_relative=False):
         if isinstance(val, URL):
             return
-        if isinstance(val, str):
-            val = urlsplit(val)
-        elif isinstance(val, SplitResult):
+        if is_relative:
+            if encoded:
+                raise ValueError("is_relative is not compatible with encoded")
+            idx1 = val.find('?')
+            idx2 = val.find('#')
+            val = _SplitResult('',  # scheme
+                               '',  # netloc
+                               quote(val[:idx1], safe='/'),
+                               query=quote(val[idx1:idx2],
+                                           safe='=+&?', plus=True),
+                               fragment=quote(val[idx2:]))
+        elif type(val) is _SplitResult:
             if not encoded:
                 raise ValueError("Cannot apply decoding to SplitResult")
+        elif isinstance(val, str):
+            val = urlsplit(val)
         else:
             raise TypeError("Constructor parameter should be str")
 
@@ -177,11 +189,11 @@ class URL:
                         user += ':' + quote(val.password)
                     netloc = user + '@' + netloc
 
-            val = SplitResult(val[0],  # scheme
-                              netloc,
-                              quote(val[2], safe='/'),
-                              query=quote(val[3], safe='=+&?', plus=True),
-                              fragment=quote(val[4]))
+            val = _SplitResult(val[0],  # scheme
+                               netloc,
+                               quote(val[2], safe='/'),
+                               query=quote(val[3], safe='=+&?', plus=True),
+                               fragment=quote(val[4]))
 
         self._val = val
         self._cache = {}
@@ -670,7 +682,7 @@ class URL:
                 elif type(v) == int:  # no subclasses like bool
                     v = str(v)
                 else:
-                    raise TypeError("Invalid variable type")
+                    raise TypeError("Invalid variable type {!r}", type(v))
                 lst.append(quoter(k)+'='+quoter(v))
             query = '&'.join(lst)
         elif isinstance(query, str):

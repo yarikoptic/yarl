@@ -68,6 +68,12 @@ Use :meth:`URL.human_repr` for getting human readable representation:
    >>> url.human_repr()
    'http://εμπορικόσήμα.eu/путь/這裡'
 
+.. warning::
+
+   ``URL()`` accepts hidden parameters for sake of library
+   optimization.  Please don't use them: they may be changed silently
+   without any *deprecation and backward compatibility* process.
+
 URL properties
 --------------
 
