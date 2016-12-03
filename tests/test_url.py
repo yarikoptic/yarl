@@ -170,6 +170,11 @@ def test_raw_query_string_non_ascii():
     assert url.raw_query_string == '%D0%B1=%D0%B2&%D1%8E=%D0%BA'
 
 
+def test_raw_query_protect_semicolon():
+    url = URL('/?a=b%3Bc')
+    assert url.raw_query_string == 'a=b%3Bc'
+
+
 def test_query_string_non_ascii():
     url = URL('http://example.com?б=в&ю=к')
     assert url.query_string == 'б=в&ю=к'
