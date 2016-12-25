@@ -149,7 +149,7 @@ def test_unquoting(num, unquote):
     expect = chr(num)
     result = unquote(given)
     assert expect == result
-    if expect not in '+=&':
+    if expect not in '+=&;':
         result = unquote(given, qs=True)
         assert expect == result
 
@@ -301,3 +301,7 @@ def test_qoute_qs_with_colon(quote):
 def test_quote_protected(quote):
     s = quote('/path%2fto/three', protected='/')
     assert s == '/path%2Fto/three'
+
+
+def test_unquote_semicolon_qs(unquote):
+    assert unquote('a%3bb', qs=True) == 'a%3Bb'

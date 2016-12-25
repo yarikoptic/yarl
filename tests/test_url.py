@@ -185,6 +185,16 @@ def test_query_string_spaces():
     assert url.query_string == 'a b=c d&e=f g'
 
 
+def test_query_string_protect_semicolon():
+    url = URL('/?a=b%3Bc')
+    assert url.query_string == 'a=b%3Bc'
+
+
+def test_query_protect_semicolon():
+    url = URL('/?a=b%3Bc')
+    assert len(url.query.items()) == 1
+
+
 def test_query_spaces():
     url = URL('http://example.com?a+b=c+d')
     assert url.query == MultiDict({'a b': 'c d'})

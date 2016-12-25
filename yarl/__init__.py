@@ -406,7 +406,9 @@ class URL:
         Empty value if URL has no query part.
 
         """
-        ret = MultiDict(parse_qsl(self.query_string, keep_blank_values=True))
+        pairs = parse_qsl(self.raw_query_string, keep_blank_values=True)
+        ret = MultiDict((unquote(k, qs=True), unquote(v, qs=True))
+                        for k, v in pairs)
         return MultiDictProxy(ret)
 
     @property
